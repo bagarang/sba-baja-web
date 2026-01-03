@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SBA BAJA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">SBA BAJA SYSTEM</div>
+        <div class="user-info">
+            <span id="roleDisplay" class="badge">Role</span>
+            <strong id="userDisplay">User</strong>
+            <button onclick="logout()" class="btn btn-outline">Keluar</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-title">
+            <h1>Ringkasan Performa Toko</h1>
+            <a href="transaksi.html" class="btn btn-accent">+ TRANSAKSI BARU</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Pemasukan Hari Ini</h3>
+                <h2 id="statsHari">Rp 0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>Bulan Ini</h3>
+                <h2 id="statsBulan">Rp 0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>Tahun Ini</h3>
+                <h2 id="statsTahun">Rp 0</h2>
+            </div>
+            <div class="stat-card highlight">
+                <h3>Total Omset</h3>
+                <h2 id="statsTotal">Rp 0</h2>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <h2>Ketersediaan Stok Barang</h2>
+                <input type="text" id="searchBarang" placeholder="Cari nama atau kode barang..." onkeyup="filterTable()">
+            </div>
+            <table id="tableBarang">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kode</th>
+                        <th>Nama Barang</th>
+                        <th>Stok</th>
+                        <th>Harga Jual</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBarangBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

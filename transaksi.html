@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaksi - SBA BAJA</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">SBA BAJA - POS SYSTEM</div>
+        <button onclick="location.href='dashboard.html'" class="btn btn-outline">Kembali</button>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h3>1. Informasi Transaksi</h3>
+            <label>Nomor Invoice (Contoh: 001)</label>
+            <input type="text" id="noInvManual" placeholder="Masukkan No. Invoice...">
+            
+            <label>Nama Pelanggan</label>
+            <input type="text" id="customer" placeholder="Nama Pelanggan">
+            
+            <label>Alamat</label>
+            <textarea id="alamat" placeholder="Alamat Pengiriman"></textarea>
+            <hr>
+            <h3>2. Pilih Barang</h3>
+            <select id="selectBarang"></select>
+            <input type="number" id="qty" placeholder="Jumlah Pcs">
+            <button onclick="tambahItem()" class="btn btn-primary" style="width: 100%;">Tambah ke Keranjang</button>
+        </div>
+
+        <div class="card">
+            <h3>3. Ringkasan Belanja</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Barang</th>
+                        <th>Qty</th>
+                        <th>Subtotal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+            <h2 id="grandTotal" style="text-align: right; border-top: 2px solid #000; padding-top: 10px;">Total: Rp 0</h2>
+            
+            <button id="btnSimpan" onclick="simpanTransaksi()" class="btn btn-accent" style="width: 100%; padding: 15px; font-size: 16px;">
+                SIMPAN & PROSES TRANSAKSI
+            </button>
+            
+            <div id="printSection" style="display: none; margin-top: 20px; text-align: center; background: #f9f9f9; padding: 20px; border: 1px dashed #000;">
+                <p>✅ Data Berhasil Disimpan!</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="btnInv" class="btn btn-primary" style="background: #000;">📄 CETAK INVOICE</button>
+                    <button id="btnSj" class="btn btn-primary" style="background: #333;">🚚 CETAK SURAT JALAN</button>
+                </div>
+                <button onclick="location.reload()" class="btn btn-accent" style="margin-top: 15px; width: 100%;">TRANSAKSI BARU</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/transaksi.js"></script>
+</body>
+</html>

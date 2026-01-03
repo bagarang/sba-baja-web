@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - SBA BAJA DAN PLAFON PVC</title>
+    <style>
+        /* Pengaturan Kertas 25cm x 15cm */
+        @page { size: 25cm 15cm; margin: 0; }
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0.5cm; background: #fff; color: #000; font-size: 12px; }
+        
+        .wrapper { 
+            width: 24cm; height: 14cm; margin: auto; 
+            border: 1.5px solid #000; padding: 20px; 
+            box-sizing: border-box; position: relative; 
+        }
+        
+        /* Header sesuai Gambar */
+        .header-title { text-align: center; }
+        .header-title h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .double-line { border-top: 1px solid #000; border-bottom: 3px double #000; height: 3px; margin: 5px 0; }
+        .header-info { text-align: center; font-size: 11px; margin-bottom: 15px; }
+
+        /* Meta Data (Kiri: No/Tgl, Kanan: Customer) */
+        .meta-container { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .meta-left table, .meta-right table { border: none; width: auto; font-size: 12px; }
+        .meta-left td, .meta-right td { border: none; padding: 1px 5px; }
+
+        /* Tabel Utama (Stroke Hitam) */
+        .main-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .main-table th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px; background: #eee; text-align: center; font-size: 12px; }
+        .main-table td { border-bottom: 1px solid #000; padding: 6px; font-size: 12px; }
+        .total-row { border-top: 2px solid #000; border-bottom: 2px solid #000; font-weight: bold; }
+
+        /* Footer & Tanda Tangan sesuai Gambar */
+        .footer-container { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .signature-box { text-align: center; width: 130px; font-size: 12px; }
+        .bank-info { font-size: 11px; color: blue; text-align: left; line-height: 1.2; font-weight: bold; }
+
+        /* Navigasi */
+        .no-print { position: fixed; top: 10px; right: 10px; padding: 10px 20px; background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+        @media print { .no-print { display: none; } .wrapper { border: 1px solid #000; } }
+    </style>
+</head>
+<body onload="loadPrintData()">
+    <button class="no-print" onclick="window.print()">PRINT INVOICE</button>
+    
+    <div class="wrapper">
+        <div class="header-title">
+            <h1>SBA BAJA DAN PLAFON PVC</h1>
+            <div class="double-line"></div>
+        </div>
+        <div class="header-info">
+            Jl. Raya Tenjo-Jasinga Kp. Tanjung Mesjid RT. 05/03 Ds. Bojong, Kec. Tenjo, Kab. Bogor 16370<br>
+            Phone: 081282777781, Email:
+        </div>
+
+        <div class="meta-container">
+            <div class="meta-left">
+                <table>
+                    <tr><td><strong>Tanggal</strong></td><td>: <span id="p_tgl"></span></td></tr>
+                    <tr><td><strong>No</strong></td><td>: <span id="p_no"></span></td></tr>
+                    <tr><td><strong>Kasir</strong></td><td>: <span id="p_ksr"></span></td></tr>
+                </table>
+            </div>
+            <div class="meta-right">
+                <table>
+                    <tr><td><strong>Nama Customer</strong></td><td>: <span id="p_cust"></span></td></tr>
+                    <tr><td><strong>Handphone</strong></td><td>: 0</td></tr>
+                    <tr><td><strong>Alamat Customer</strong></td><td>: <span id="p_alm"></span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th width="30">No</th>
+                    <th>Nama Barang</th>
+                    <th width="150">Banyaknya</th>
+                    <th width="120">Harga (Rp)</th>
+                    <th width="120">Total (Rp)</th>
+                </tr>
+            </thead>
+            <tbody id="p_items">
+                </tbody>
+            <tr class="total-row">
+                <td colspan="4" style="padding: 10px; text-align: right;">TOTAL</td>
+                <td align="right" id="p_grand"></td>
+            </tr>
+        </table>
+
+        <div class="footer-container">
+            <div class="signature-box">Hormat Kami :<br><br><br>(....................)</div>
+            <div class="signature-box">Disetujui :<br><br><br>(....................)</div>
+            <div class="signature-box">Dikirim :<br><br><br>(....................)</div>
+            <div class="signature-box">Diterima :<br><br><br>(....................)</div>
+            <div class="bank-info">
+                No Rekening :<br>
+                BCA 5875.4820.31<br>
+                a/n Hasan Sanusi
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/print.js"></script>
+</body>
+</html>

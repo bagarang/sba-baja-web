@@ -1,17 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     checkAccess();
     displayUserProfile();
-    
-    const role = localStorage.getItem("userRole");
-    const statsContainer = document.querySelector(".stats-grid");
-
-    if (role === "kasir") {
-        if (statsContainer) statsContainer.style.display = "none";
-        document.querySelector(".header-title h1").innerText = "Menu Kasir - SBA BAJA";
-    } else {
-        loadDashboardStats();
-    }
-    
+    loadDashboardStats();
     loadInventoryTable();
 });
 
@@ -21,12 +11,29 @@ function checkAccess() {
     }
 }
 
+/**
+ * LOGIKA PERPINDAHAN MENU
+ */
+function switchView(viewName) {
+    // Reset classes
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-menu li').forEach(l => l.classList.remove('active'));
+
+    if (viewName === 'dashboard') {
+        document.getElementById('sectionDashboard').classList.add('active');
+        document.getElementById('menuDashboard').classList.add('active');
+        loadDashboardStats();
+    } else if (viewName === 'accounting') {
+        document.getElementById('sectionAccounting').classList.add('active');
+        document.getElementById('menuAccounting').classList.add('active');
+        loadAccountingTable();
+    }
+}
+
 function displayUserProfile() {
     const userDisplay = document.getElementById("userDisplay");
     const roleDisplay = document.getElementById("roleDisplay");
-    
     if (userDisplay) userDisplay.innerText = localStorage.getItem("username");
-    
     if (roleDisplay) {
         const role = localStorage.getItem("userRole") || "kasir";
         roleDisplay.innerText = role.toUpperCase();
@@ -38,26 +45,19 @@ async function loadDashboardStats() {
     try {
         const response = await fetch(`${config.apiUrl}?action=getDashboard`);
         const data = await response.json();
-        
         const formatRp = (num) => "Rp " + num.toLocaleString('id-ID');
-
         document.getElementById("statsHari").innerText = formatRp(data.hari_ini);
         document.getElementById("statsBulan").innerText = formatRp(data.bulan_ini);
         document.getElementById("statsTahun").innerText = formatRp(data.tahun_ini);
         document.getElementById("statsTotal").innerText = formatRp(data.total_omset);
-    } catch (e) {
-        console.error("Gagal memuat statistik dashboard:", e);
-    }
+    } catch (e) { console.error("Gagal load stats:", e); }
 }
 
 async function loadInventoryTable() {
     const tableBody = document.getElementById("tableBarangBody");
-    if (!tableBody) return;
-
     try {
         const response = await fetch(`${config.apiUrl}?action=getBarang`);
         const items = await response.json();
-        
         tableBody.innerHTML = items.map((item, index) => `
             <tr>
                 <td>${index + 1}</td>
@@ -67,10 +67,31 @@ async function loadInventoryTable() {
                 <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
             </tr>
         `).join("");
-        
-    } catch (e) {
-        tableBody.innerHTML = "<tr><td colspan='5'>Gagal memuat data stok.</td></tr>";
-    }
+    } catch (e) { tableBody.innerHTML = "<tr><td colspan='5'>Gagal load data.</td></tr>"; }
+}
+
+/**
+ * LOAD TABEL AKUNTANSI
+ */
+async function loadAccountingTable() {
+    const tableBody = document.getElementById("tableAccountingBody");
+    tableBody.innerHTML = "<tr><td colspan='8'>Memuat data transaksi...</td></tr>";
+    try {
+        const response = await fetch(`${config.apiUrl}?action=getAccounting`);
+        const data = await response.json();
+        tableBody.innerHTML = data.map(item => `
+            <tr>
+                <td><small>${item.tanggal}</small></td>
+                <td><strong>${item.no_invoice}</strong></td>
+                <td>${item.kasir}</td>
+                <td>${item.kode}</td>
+                <td>${item.nama}</td>
+                <td>${item.qty}</td>
+                <td>${item.harga}</td>
+                <td style="font-weight:bold; color:#10b981;">${item.total}</td>
+            </tr>
+        `).join("");
+    } catch (e) { tableBody.innerHTML = "<tr><td colspan='8'>Gagal load akuntansi.</td></tr>"; }
 }
 
 function filterTable() {

@@ -8,14 +8,38 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         .main-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background: #1e293b; color: white; padding: 20px; }
-        .content { flex: 1; padding: 30px; background: #f8fafc; }
+        .sidebar { width: 250px; background: #1e293b; color: white; padding: 20px; flex-shrink: 0; }
+        .content { flex: 1; padding: 30px; background: #f8fafc; overflow-x: hidden; }
+        
         .nav-menu { list-style: none; padding: 0; margin-top: 30px; }
         .nav-menu li { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; }
         .nav-menu li:hover { background: #334155; }
         .nav-menu li.active { background: #fbbf24; color: #1e293b; font-weight: bold; }
+        
+        /* CSS Perbaikan Tombol Keluar (Putih) */
+        .btn-logout {
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            background: transparent;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            margin-top: 50px;
+            font-weight: 600;
+        }
+        .btn-logout:hover {
+            background: #ffffff;
+            color: #1e293b;
+        }
+
         .view-section { display: none; }
         .view-section.active { display: block; }
+        
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 5px; }
+        .btn-accent { background: #fbbf24; color: #1e293b; }
+        .btn-primary { background: #3b82f6; color: white; }
     </style>
 </head>
 <body>
@@ -23,25 +47,27 @@
         <div class="sidebar">
             <h2 style="font-size: 1.2rem; margin-bottom: 30px;">SBA BAJA SYSTEM</h2>
             <div class="user-profile">
-                <span id="roleDisplay" class="badge">OWNER</span><br>
-                <small id="userDisplay">Admin</small>
+                <span id="roleDisplay" class="badge">ROLE</span><br>
+                <strong id="userDisplay" style="font-size: 1.1rem;">User</strong>
             </div>
+            
             <ul class="nav-menu">
                 <li id="menuDashboard" class="active" onclick="switchView('dashboard')">Dashboard Performa</li>
                 <li id="menuAccounting" onclick="switchView('accounting')">Pencatatan Akuntansi</li>
             </ul>
-            <button onclick="logout()" class="btn btn-outline" style="margin-top: 50px; width: 100%;">Keluar</button>
+
+            <button onclick="logout()" class="btn-logout">Keluar</button>
         </div>
 
         <div class="content">
             
             <div id="sectionDashboard" class="view-section active">
                 <div class="header-title">
-                    <h1>Ringkasan Performa Toko</h1>
+                    <h1 id="mainTitle">Ringkasan Performa Toko</h1>
                     <a href="transaksi.html" class="btn btn-accent">+ TRANSAKSI BARU</a>
                 </div>
 
-                <div class="stats-grid">
+                <div class="stats-grid" id="statsGrid">
                     <div class="stat-card"><h3>Hari Ini</h3><h2 id="statsHari">Rp 0</h2></div>
                     <div class="stat-card"><h3>Bulan Ini</h3><h2 id="statsBulan">Rp 0</h2></div>
                     <div class="stat-card"><h3>Tahun Ini</h3><h2 id="statsTahun">Rp 0</h2></div>

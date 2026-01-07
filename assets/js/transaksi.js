@@ -11,12 +11,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         dbBarang.forEach(b => {
             const opt = document.createElement("option");
             opt.value = b.kode;
-            opt.textContent = `${b.nama} (Stok: ${b.stok})`;
+            // Menampilkan harga original di pilihan barang
+            opt.textContent = `${b.nama} (Stok: ${b.stok}) - Rp ${b.harga.toLocaleString()}`;
             sel.appendChild(opt);
         });
-    } catch (err) {
-        console.error("Gagal memuat data barang:", err);
-    }
+    } catch (err) { console.error("Load barang failed", err); }
 });
 
 function tambahItem() {
@@ -24,37 +23,46 @@ function tambahItem() {
     const b = dbBarang.find(x => x.kode.toString() === selVal.toString());
     const q = parseInt(document.getElementById("qty").value);
 
-    if (!b || !q || q <= 0) return alert("Pilih barang dan jumlah yang valid!");
-    
-    // Cek apakah barang sudah ada di keranjang
-    const existing = cart.find(i => i.kode === b.kode);
-    if (existing) {
-        existing.qty += q;
-    } else {
-        cart.push({ ...b, qty: q });
-    }
-    
+    if (!b || !q || q <= 0) return alert("Pilih barang dan jumlah!");
+
+    // Simpan harga_jual awal sama dengan harga original
+    cart.push({ ...b, qty: q, harga_jual: b.harga });
     render();
-    document.getElementById("qty").value = 1; // Reset qty input
 }
 
-function render() {
+/**
+ * Fungsi untuk mengupdate harga barang di keranjang
+ */
+function updateHargaCart(idx, newPrice) {
+    cart[idx].harga_jual = parseInt(newPrice) || 0;
+    render(false); // Render ulang tanpa mengganggu fokus input
+}
+
+function render(rebuild = true) {
     const body = document.getElementById("cartBody"); 
-    body.innerHTML = ""; 
+    if(rebuild) body.innerHTML = ""; 
     let total = 0;
 
     cart.forEach((i, idx) => { 
-        const subtotal = i.qty * i.harga;
+        const subtotal = i.qty * i.harga_jual;
         total += subtotal;
-        body.innerHTML += `
-            <tr>
-                <td>${i.nama}</td>
-                <td>${i.qty}</td>
-                <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="cart.splice(${idx},1);render()">X</button></td>
-            </tr>`;
+        
+        if(rebuild) {
+            body.innerHTML += `
+                <tr>
+                    <td>${i.nama}</td>
+                    <td>${i.qty}</td>
+                    <td>
+                        <input type="number" class="form-control form-sm" 
+                               value="${i.harga_jual}" 
+                               onchange="updateHargaCart(${idx}, this.value)" 
+                               style="width: 120px;">
+                    </td>
+                    <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
+                    <td><button class="btn btn-sm btn-danger" onclick="cart.splice(${idx},1);render()">X</button></td>
+                </tr>`;
+        }
     });
-    
     document.getElementById("grandTotal").innerText = "Total: Rp " + total.toLocaleString('id-ID');
 }
 
@@ -62,18 +70,18 @@ async function simpanTransaksi() {
     const no = document.getElementById("noInvManual").value;
     const btn = document.getElementById("btnSimpan");
 
-    if (!no || cart.length === 0) return alert("Nomor Invoice dan Barang tidak boleh kosong!");
+    if (!no || cart.length === 0) return alert("Nomor Invoice dan Barang wajib diisi!");
     
-    // Mencegah double click
     btn.disabled = true;
-    btn.innerText = "Menyimpan...";
+    btn.innerText = "Proses...";
 
     const payload = { 
         no_invoice: no, 
         kasir: localStorage.getItem("username"), 
         customer: document.getElementById("customer").value || "Umum", 
         alamat: document.getElementById("alamat").value || "-", 
-        total: cart.reduce((s, i) => s + (i.qty * i.harga), 0), 
+        telepon: document.getElementById("telepon").value || "-", // Input No HP Baru
+        total: cart.reduce((s, i) => s + (i.qty * i.harga_jual), 0), 
         items: cart 
     };
 
@@ -89,13 +97,9 @@ async function simpanTransaksi() {
             document.getElementById("printSection").style.display = "block";
             document.getElementById("btnInv").onclick = () => window.open(`invoice-print.html?no_invoice=${no}`, '_blank');
             document.getElementById("btnSj").onclick = () => window.open(`surat-jalan-print.html?no_invoice=${no}`, '_blank');
-            alert("Transaksi Berhasil Disimpan!");
-        } else {
-            throw new Error(result.message);
         }
     } catch (e) {
-        alert("Gagal Simpan: " + e.message);
+        alert("Gagal Simpan");
         btn.disabled = false;
-        btn.innerText = "Simpan Transaksi";
     }
 }

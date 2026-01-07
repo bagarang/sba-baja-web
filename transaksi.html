@@ -17,8 +17,9 @@
         .btn-accent:hover { background-color: #f59e0b; }
         .btn-primary-dark { background-color: #0f172a; color: white; border: none; font-weight: 600; }
         .table-custom thead { background-color: #f8fafc; }
-        .total-display { font-size: 1.5rem; font-weight: 800; color: #1e293b; text-align: right; }
+        .total-display { font-size: 1.8rem; font-weight: 800; color: #0f172a; text-align: right; }
         #printSection { display: none; }
+        .harga-input { width: 140px; font-weight: bold; color: #2563eb; }
     </style>
 </head>
 <body>
@@ -26,30 +27,29 @@
     <nav class="navbar">
         <div class="container-fluid">
             <span class="navbar-brand">SBA BAJA - POS SYSTEM</span>
-            <a href="dashboard.html" class="btn btn-outline-light btn-sm">Kembali Ke Dashboard</a>
+            <a href="dashboard.html" class="btn btn-outline-light btn-sm">Kembali</a>
         </div>
     </nav>
 
     <div class="container">
-        
         <div class="card p-4 mb-4">
             <h5 class="mb-3">1. Informasi Transaksi</h5>
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label">Nomor Invoice (Contoh: 001)</label>
-                    <input type="text" id="noInvManual" class="form-control" placeholder="No. Invoice">
+                    <label class="form-label">Nomor Invoice</label>
+                    <input type="text" id="noInvManual" class="form-control" placeholder="Contoh: 001">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Nama Pelanggan</label>
                     <input type="text" id="customer" class="form-control" placeholder="Nama Pelanggan">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Nomor Handphone Konsumen</label>
+                    <label class="form-label">Nomor Handphone</label>
                     <input type="text" id="telepon" class="form-control" placeholder="08xxxxxxxxxx">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Alamat Pengiriman</label>
-                    <textarea id="alamat" class="form-control" rows="1" placeholder="Alamat Lengkap"></textarea>
+                    <textarea id="alamat" class="form-control" rows="1" placeholder="Alamat"></textarea>
                 </div>
             </div>
         </div>
@@ -57,17 +57,17 @@
         <div class="card p-4 mb-4">
             <h5 class="mb-3">2. Pilih Barang</h5>
             <div class="row g-3 align-items-end">
-                <div class="col-md-8">
-                    <label class="form-label">Cari Barang</label>
+                <div class="col-md-7">
+                    <label class="form-label">Cari Barang (Master Harga)</label>
                     <select id="selectBarang" class="form-select">
                         <option value="">-- Memuat Barang... --</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Jumlah (Qty)</label>
-                    <input type="number" id="qty" class="form-control" value="1" min="1">
+                    <label class="form-label">Qty</label>
+                    <input type="number" id="qty" class="form-control" value="1">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <button class="btn btn-primary-dark w-100" onclick="tambahItem()">Tambah Ke Keranjang</button>
                 </div>
             </div>
@@ -80,14 +80,14 @@
                     <thead>
                         <tr>
                             <th>Nama Barang</th>
-                            <th width="100">Qty</th>
-                            <th width="150">Harga Satuan (Rp)</th>
-                            <th width="150">Subtotal</th>
-                            <th width="50">Aksi</th>
+                            <th width="80" class="text-center">Qty</th>
+                            <th width="160">Harga Satuan (Edit)</th>
+                            <th width="180" class="text-end">Subtotal Riil</th>
+                            <th width="50" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="cartBody">
-                        <tr><td colspan="5" class="text-center text-muted">Belum ada barang di keranjang.</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted">Keranjang masih kosong.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -107,7 +107,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script src="assets/js/config.js"></script>
@@ -115,94 +114,99 @@
         let cart = []; 
         let dbBarang = [];
 
-        // Load Master Barang saat halaman dibuka
+        // 1. Load data barang dari API
         document.addEventListener("DOMContentLoaded", async () => {
             try {
                 const res = await fetch(`${config.apiUrl}?action=getBarang`);
                 dbBarang = await res.json();
                 const sel = document.getElementById("selectBarang");
                 sel.innerHTML = '<option value="">-- Pilih Barang --</option>';
-                
                 dbBarang.forEach(b => {
                     const opt = document.createElement("option");
                     opt.value = b.kode;
-                    // Tampilkan stok dan harga asli
-                    opt.textContent = `${b.nama} (Stok: ${b.stok}) - Rp ${b.harga.toLocaleString('id-ID')}`;
+                    opt.textContent = `${b.nama} (Stok: ${b.stok}) - Rp ${b.harga.toLocaleString()}`;
                     sel.appendChild(opt);
                 });
-            } catch (err) { alert("Gagal mengambil data barang."); }
+            } catch (err) { console.error("Load barang gagal"); }
         });
 
+        // 2. Tambah item ke keranjang
         function tambahItem() {
             const selVal = document.getElementById("selectBarang").value;
             const b = dbBarang.find(x => x.kode.toString() === selVal.toString());
             const q = parseFloat(document.getElementById("qty").value);
 
-            if (!b || !q || q <= 0) return alert("Pilih barang dan masukkan jumlah yang valid!");
+            if (!b || !q || q <= 0) return alert("Pilih barang dan jumlah!");
 
-            // Masuk keranjang dengan harga awal dari master
+            // Default harga_jual mengambil harga asli dari master
             cart.push({ ...b, qty: q, harga_jual: b.harga });
             render();
             document.getElementById("qty").value = "1";
         }
 
-        // Update harga jual secara dinamis di keranjang
+        // 3. FIX: Update harga editan dan sinkronkan Subtotal & Total
         function updateHargaCart(idx, newPrice) {
-            cart[idx].harga_jual = parseInt(newPrice) || 0;
-            render(false); // Render ulang tanpa rebuild total agar input tidak hilang fokus
+            const hargaBaru = parseFloat(newPrice) || 0;
+            cart[idx].harga_jual = hargaBaru;
+            // Langsung render ulang agar Subtotal di baris tersebut dan Grand Total sinkron
+            render(); 
         }
 
-        function render(rebuild = true) {
+        // 4. FIX UI LOGIC: Merender tabel keranjang
+        function render() {
             const body = document.getElementById("cartBody"); 
-            if(rebuild) body.innerHTML = ""; 
-            let total = 0;
+            body.innerHTML = ""; 
+            let grandTotal = 0;
 
             if (cart.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada barang di keranjang.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Keranjang masih kosong.</td></tr>';
                 document.getElementById("grandTotal").innerText = "Total: Rp 0";
                 return;
             }
 
-            cart.forEach((i, idx) => { 
-                const subtotal = i.qty * i.harga_jual;
-                total += subtotal;
+            cart.forEach((item, idx) => { 
+                // Kalkulasi Subtotal: Qty dikali Harga yang sedang diedit
+                const subtotalItem = item.qty * item.harga_jual;
+                grandTotal += subtotalItem;
                 
-                if(rebuild) {
-                    body.innerHTML += `
-                        <tr>
-                            <td><strong>${i.nama}</strong></td>
-                            <td>${i.qty}</td>
-                            <td>
-                                <input type="number" class="form-control form-control-sm" 
-                                       value="${i.harga_jual}" 
-                                       onchange="updateHargaCart(${idx}, this.value)">
-                            </td>
-                            <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="cart.splice(${idx},1);render()">X</button></td>
-                        </tr>`;
-                }
+                body.innerHTML += `
+                    <tr>
+                        <td><strong>${item.nama}</strong></td>
+                        <td class="text-center">${item.qty}</td>
+                        <td>
+                            <input type="number" class="form-control harga-input" 
+                                   value="${item.harga_jual}" 
+                                   oninput="updateHargaCart(${idx}, this.value)">
+                        </td>
+                        <td class="text-end fw-bold">Rp ${subtotalItem.toLocaleString('id-ID')}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-danger" onclick="cart.splice(${idx},1);render()">X</button>
+                        </td>
+                    </tr>`;
             });
-            document.getElementById("grandTotal").innerText = "Total: Rp " + total.toLocaleString('id-ID');
+
+            // Update Tampilan Grand Total (Hasil penjumlahan semua Subtotal editan)
+            document.getElementById("grandTotal").innerText = "Total: Rp " + grandTotal.toLocaleString('id-ID');
         }
 
+        // 5. Simpan Transaksi ke Spreadsheet
         async function simpanTransaksi() {
             const no = document.getElementById("noInvManual").value;
-            const hp = document.getElementById("telepon").value; // Ambil nilai HP
             const btn = document.getElementById("btnSimpan");
-
+            
             if (!no || cart.length === 0) return alert("Nomor Invoice dan Barang wajib diisi!");
             
             btn.disabled = true;
-            btn.innerText = "SEDANG MENYIMPAN... MOHON TUNGGU";
+            btn.innerText = "SEDANG MENYIMPAN...";
 
-            // Siapkan Data Kiriman (Payload)
+            // Payload mengirimkan total akhir yang sudah disinkronkan
             const payload = { 
                 no_invoice: no, 
                 kasir: localStorage.getItem("username") || "Admin", 
                 customer: document.getElementById("customer").value || "Umum", 
                 alamat: document.getElementById("alamat").value || "-", 
-                telepon: hp || "-", // Data No HP Konsumen
-                total: cart.reduce((s, i) => s + (i.qty * i.harga_jual), 0), 
+                telepon: document.getElementById("telepon").value || "-", 
+                total: cart.reduce((sum, i) => sum + (i.qty * i.harga_jual), 0), 
                 items: cart 
             };
 
@@ -214,9 +218,7 @@
                 const result = await res.json();
                 
                 if (result.status === "success") {
-                    btn.innerText = "TRANSAKSI BERHASIL!";
-                    
-                    // Jeda sebentar agar user bisa melihat status sukses
+                    btn.innerText = "BERHASIL DISIMPAN!";
                     setTimeout(() => {
                         btn.style.display = "none";
                         document.getElementById("printSection").style.display = "block";
@@ -229,7 +231,7 @@
                     btn.innerText = "SIMPAN & PROSES TRANSAKSI";
                 }
             } catch (e) {
-                alert("Kesalahan Koneksi Server.");
+                alert("Kesalahan koneksi.");
                 btn.disabled = false;
                 btn.innerText = "SIMPAN & PROSES TRANSAKSI";
             }

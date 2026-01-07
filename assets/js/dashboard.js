@@ -1,5 +1,5 @@
 /**
- * SBA BAJA SYSTEM - Dashboard Logic (Versi Fix)
+ * SBA BAJA SYSTEM - Dashboard Logic (Versi Fix Presisi)
  */
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -40,11 +40,11 @@ function switchView(viewName) {
     if (viewName === 'dashboard') {
         document.getElementById('sectionDashboard').classList.add('active');
         document.getElementById('menuDashboard').classList.add('active');
-        loadDashboardStats(); // Refresh stats saat balik ke dashboard
+        loadDashboardStats(); // Refresh statistik omset
     } else if (viewName === 'accounting') {
         document.getElementById('sectionAccounting').classList.add('active');
         document.getElementById('menuAccounting').classList.add('active');
-        loadAccountingTable();
+        loadAccountingTable(); // Muat riwayat transaksi
     }
 }
 
@@ -53,11 +53,13 @@ async function loadDashboardStats() {
         const response = await fetch(`${config.apiUrl}?action=getDashboard`);
         const data = await response.json();
         const f = (n) => "Rp " + n.toLocaleString('id-ID');
+        
+        // Update DOM dengan omset yang dihitung dari kolom Total (Qty * Harga Jual)
         document.getElementById("statsHari").innerText = f(data.hari_ini || 0);
         document.getElementById("statsBulan").innerText = f(data.bulan_ini || 0);
         document.getElementById("statsTahun").innerText = f(data.tahun_ini || 0);
         document.getElementById("statsTotal").innerText = f(data.total_omset || 0);
-    } catch (e) { console.error("Gagal muat statistik."); }
+    } catch (e) { console.error("Gagal muat statistik dashboard."); }
 }
 
 async function loadInventoryTable() {
@@ -77,11 +79,11 @@ async function loadInventoryTable() {
 }
 
 /**
- * FIX: LOAD AKUNTANSI YANG GAGAL MUAT
+ * PERBAIKAN: Fungsi Load Akuntansi Lengkap
  */
 async function loadAccountingTable() {
     const tableBody = document.getElementById("tableAccountingBody");
-    tableBody.innerHTML = "<tr><td colspan='8' class='text-center'>Memuat data transaksi...</td></tr>";
+    tableBody.innerHTML = "<tr><td colspan='8' class='text-center text-primary'>Memuat data transaksi...</td></tr>";
     try {
         const response = await fetch(`${config.apiUrl}?action=getAccounting`);
         const data = await response.json();
@@ -98,13 +100,13 @@ async function loadAccountingTable() {
                 <td>${item.kasir}</td>
                 <td>${item.kode}</td>
                 <td>${item.nama}</td>
-                <td>${item.qty}</td>
-                <td>${item.harga}</td>
-                <td style="font-weight:bold; color:#10b981;">${item.total}</td>
+                <td align="center">${item.qty}</td>
+                <td align="right">Rp ${item.harga}</td>
+                <td align="right" style="font-weight:bold; color:#10b981;">Rp ${item.total}</td>
             </tr>`).join("");
     } catch (e) { 
         console.error("Error Akuntansi:", e);
-        tableBody.innerHTML = "<tr><td colspan='8' class='text-center text-danger'>Gagal muat akuntansi. Periksa koneksi atau deploy ulang script.</td></tr>"; 
+        tableBody.innerHTML = "<tr><td colspan='8' class='text-center text-danger'>GAGAL MUAT DATA. Pastikan doGet sudah di-deploy ulang.</td></tr>"; 
     }
 }
 
@@ -115,4 +117,4 @@ function filterTable() {
     });
 }
 
-function logout() { if (confirm("Keluar?")) { localStorage.clear(); window.location.href = "index.html"; } }
+function logout() { if (confirm("Keluar dari sistem?")) { localStorage.clear(); window.location.href = "index.html"; } }

@@ -2,76 +2,67 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Jalan - SBA BAJA DAN PLAFON PVC</title>
+    <title>SURAT JALAN - SBA BAJA DAN PLAFON PVC</title>
     <style>
         @page { size: 25cm 15cm; margin: 0; }
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 0.5cm; background: #fff; font-size: 12px; }
-        .wrapper { width: 24cm; height: 14cm; margin: auto; border: 1.5px solid #000; padding: 20px; box-sizing: border-box; position: relative; }
-        
+        .wrapper { width: 24cm; height: 14cm; margin: auto; border: 1.5px solid #000; padding: 20px; box-sizing: border-box; }
         .header-title { text-align: center; }
-        .header-title h1 { margin: 0; font-size: 24px; font-weight: bold; }
+        .header-title h1 { margin: 0; font-size: 26px; font-weight: 800; }
+        .header-title h2 { margin: 5px 0 0 0; font-size: 20px; text-decoration: underline; }
         .double-line { border-top: 1px solid #000; border-bottom: 3px double #000; height: 3px; margin: 5px 0; }
         .header-info { text-align: center; font-size: 11px; margin-bottom: 10px; }
-
-        .meta-container { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 12px; }
-        
+        .meta-container { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .main-table { width: 100%; border-collapse: collapse; }
         .main-table th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px; background: #eee; }
-        .main-table td { border-bottom: 1px solid #000; padding: 8px; }
-
-        .signature-area { margin-top: 25px; display: flex; gap: 100px; text-align: center; }
+        .main-table td { border-bottom: 1px solid #000; padding: 8px; text-align: center; }
+        .signature-area { margin-top: 30px; display: flex; justify-content: space-around; text-align: center; }
         .footer-note { text-align: center; font-size: 11px; margin-top: 40px; font-style: italic; font-weight: bold; }
-
-        .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border: none; cursor: pointer; }
+        .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border: none; cursor: pointer; z-index: 999; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body onload="loadPrintData()">
     <button class="no-print" onclick="window.print()">PRINT SURAT JALAN</button>
-    
     <div class="wrapper">
         <div class="header-title">
             <h1>SBA BAJA DAN PLAFON PVC</h1>
+            <h2>SURAT JALAN</h2>
             <div class="double-line"></div>
         </div>
-        <div class="header-info">Jl. Raya Tenjo-Jasinga Kp. Tanjung Mesjid RT. 05/03 Ds. Bojong, Kec. Tenjo, Kab. Bogor 16370</div>
-        
+        <div class="header-info">Jl. Raya Tenjo-Jasinga Kp. Tanjung Mesjid RT. 05/03 Ds. Bojong, Kec. Tenjo, Kab. Bogor 16370 | <strong>Telp: 0878-4945-6328</strong></div>
         <div class="meta-container">
             <div>
                 <strong>Tanggal :</strong> <span id="sj_tgl"></span><br>
-                <strong>No :</strong> <span id="sj_no"></span><br>
+                <strong>No Transaksi :</strong> <span id="sj_no"></span><br>
                 <strong>Kasir :</strong> <span id="sj_ksr"></span>
             </div>
             <div style="text-align: right;">
-                <strong>Nama Customer :</strong> <span id="sj_cust"></span><br>
-                <strong>Alamat Customer :</strong> <span id="sj_alm"></span>
+                <strong>Customer :</strong> <span id="sj_cust"></span><br>
+                <strong>Handphone :</strong> <span id="sj_hp"></span><br>
+                <strong>Alamat :</strong> <span id="sj_alm"></span>
             </div>
         </div>
-
         <table class="main-table">
             <thead>
                 <tr>
-                    <th width="40">No</th>
-                    <th>Item</th>
-                    <th width="100">Satuan</th>
-                    <th width="100">Qty</th>
+                    <th width="50">No</th>
+                    <th>Nama Barang / Item</th>
+                    <th width="150">Banyaknya (Qty)</th>
                 </tr>
             </thead>
-            <tbody id="sj_items">
-                </tbody>
+            <tbody id="sj_items"></tbody>
         </table>
-
         <div class="signature-area">
-            <div style="width: 150px;">Diterima :<br><br><br>(....................)</div>
-            <div style="width: 150px;">Dikirim :<br><br><br>(....................)</div>
+            <div>Diterima Oleh:<br><br><br><br>(....................)</div>
+            <div>Supir / Pengirim:<br><br><br><br>(....................)</div>
+            <div>Hormat Kami:<br><br><br><br>(....................)</div>
         </div>
-
         <div class="footer-note">
-            *Barang-barang yang sudah dibeli/dipesan tidak dapat ditukar/dikembalikan*<br>
-            ==Terimakasih==
+            *Barang-barang yang sudah dibeli tidak dapat ditukar atau dikembalikan*<br>
+            == Terimakasih Atas Kepercayaan Anda ==
         </div>
     </div>
-
     <script src="assets/js/config.js"></script>
     <script src="assets/js/print.js"></script>
 </body>

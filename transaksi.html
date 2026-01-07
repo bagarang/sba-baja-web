@@ -6,6 +6,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .navbar { background: #0f172a; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; }
+        .navbar-brand { color: white; font-weight: bold; text-decoration: none; }
         .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; padding: 20px; background: white; }
         .btn-accent { background: #fbbf24; font-weight: bold; border: none; width: 100%; padding: 15px; }
         .total-box { font-size: 24px; font-weight: 800; text-align: right; margin-top: 10px; }
@@ -13,9 +15,13 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h3>SBA BAJA - POS SYSTEM</h3>
+    
+    <nav class="navbar d-flex justify-content-between align-items-center">
+        <a href="#" class="navbar-brand">SBA BAJA - POS SYSTEM</a>
+        <a href="dashboard.html" class="btn btn-outline-light btn-sm">Kembali Ke Dashboard</a>
+    </nav>
 
+    <div class="container">
         <div class="card">
             <h5>1. Informasi Transaksi</h5>
             <div class="row g-2">
@@ -37,26 +43,30 @@
 
         <div class="card">
             <h5>3. Ringkasan Belanja</h5>
-            <table class="table">
+            <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>Barang</th>
-                        <th>Qty</th>
+                        <th>Nama Barang</th>
+                        <th width="80">Qty</th>
                         <th width="150">Harga Edit (Satuan)</th>
-                        <th class="text-end">Subtotal (Cetak)</th>
+                        <th class="text-end" width="150">Subtotal (Cetak)</th>
                         <th width="50">Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="cartBody"></tbody>
+                <tbody id="cartBody">
+                    <tr><td colspan="5" class="text-center text-muted">Keranjang masih kosong.</td></tr>
+                </tbody>
             </table>
-            <div class="total-box" id="grandTotal">Total: Rp 0</div>
+            <div class="total-box" id="grandTotal">Total Cetak: Rp 0</div>
             <button id="btnSimpan" class="btn btn-accent mt-3" onclick="simpanTransaksi()">SIMPAN & PROSES TRANSAKSI</button>
             
-            <div id="printSection" id="printSection">
-                <p class="text-success fw-bold">Transaksi Tersimpan!</p>
-                <button class="btn btn-dark m-1" id="btnInv">Cetak Invoice</button>
-                <button class="btn btn-outline-dark m-1" id="btnSj">Cetak Surat Jalan</button>
-                <button class="btn btn-secondary m-1" onclick="location.reload()">Baru</button>
+            <div id="printSection">
+                <p class="text-success fw-bold">✔ Transaksi Berhasil Disimpan!</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-dark" id="btnInv">Cetak Invoice</button>
+                    <button class="btn btn-outline-dark" id="btnSj">Cetak Surat Jalan</button>
+                    <button class="btn btn-secondary" onclick="location.reload()">Transaksi Baru</button>
+                </div>
             </div>
         </div>
     </div>
@@ -70,7 +80,7 @@
             const res = await fetch(`${config.apiUrl}?action=getBarang`);
             dbBarang = await res.json();
             const sel = document.getElementById("selectBarang");
-            sel.innerHTML = '<option value="">-- Pilih --</option>';
+            sel.innerHTML = '<option value="">-- Pilih Barang --</option>';
             dbBarang.forEach(b => {
                 const opt = document.createElement("option");
                 opt.value = b.kode;
@@ -84,8 +94,11 @@
             const b = dbBarang.find(x => x.kode.toString() === selVal.toString());
             const q = parseFloat(document.getElementById("qty").value);
             if (!b || q <= 0) return alert("Pilih barang!");
+            
+            // Simpan harga asli (b.harga) dan harga jual awal (b.harga)
             cart.push({ ...b, qty: q, harga_jual: b.harga });
             render();
+            document.getElementById("qty").value = "1";
         }
 
         /**
@@ -101,12 +114,18 @@
             body.innerHTML = ""; 
             let totalPrint = 0;
 
+            if (cart.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Keranjang masih kosong.</td></tr>';
+                document.getElementById("grandTotal").innerText = "Total Cetak: Rp 0";
+                return;
+            }
+
             cart.forEach((item, idx) => { 
                 const subtotal = item.qty * item.harga_jual;
                 totalPrint += subtotal;
                 body.innerHTML += `
                     <tr>
-                        <td>${item.nama}</td>
+                        <td><strong>${item.nama}</strong></td>
                         <td>${item.qty}</td>
                         <td>
                             <input type="number" class="form-control form-control-sm" 
@@ -123,7 +142,7 @@
         async function simpanTransaksi() {
             const no = document.getElementById("noInvManual").value;
             const btn = document.getElementById("btnSimpan");
-            if (!no || cart.length === 0) return alert("Lengkapi data!");
+            if (!no || cart.length === 0) return alert("Data tidak lengkap!");
             
             btn.disabled = true;
             btn.innerText = "MENYIMPAN...";
@@ -134,17 +153,30 @@
                 customer: document.getElementById("customer").value || "Umum", 
                 alamat: document.getElementById("alamat").value || "-", 
                 telepon: document.getElementById("telepon").value || "-", 
+                // Total yang dikirim ke header adalah total editan (hanya untuk referensi header)
                 total: cart.reduce((s, i) => s + (i.qty * i.harga_jual), 0), 
                 items: cart 
             };
 
-            const res = await fetch(`${config.apiUrl}?action=simpanPenjualan`, { method: "POST", body: JSON.stringify(payload) });
-            const result = await res.json();
-            if (result.status === "success") {
-                btn.style.display = "none";
-                document.getElementById("printSection").style.display = "block";
-                document.getElementById("btnInv").onclick = () => window.open(`invoice-print.html?no_invoice=${no}`, '_blank');
-                document.getElementById("btnSj").onclick = () => window.open(`surat-jalan-print.html?no_invoice=${no}`, '_blank');
+            try {
+                const res = await fetch(`${config.apiUrl}?action=simpanPenjualan`, { 
+                    method: "POST", 
+                    body: JSON.stringify(payload) 
+                });
+                const result = await res.json();
+                
+                if (result.status === "success") {
+                    btn.style.display = "none";
+                    document.getElementById("printSection").style.display = "block";
+                    document.getElementById("btnInv").onclick = () => window.open(`invoice-print.html?no_invoice=${no}`, '_blank');
+                    document.getElementById("btnSj").onclick = () => window.open(`surat-jalan-print.html?no_invoice=${no}`, '_blank');
+                } else {
+                    alert("Error: " + result.message);
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert("Kesalahan koneksi.");
+                btn.disabled = false;
             }
         }
     </script>

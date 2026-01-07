@@ -40,6 +40,7 @@ function switchView(viewName) {
     if (viewName === 'dashboard') {
         document.getElementById('sectionDashboard').classList.add('active');
         document.getElementById('menuDashboard').classList.add('active');
+        loadDashboardStats(); // Refresh stats saat balik ke dashboard
     } else if (viewName === 'accounting') {
         document.getElementById('sectionAccounting').classList.add('active');
         document.getElementById('menuAccounting').classList.add('active');
@@ -75,12 +76,21 @@ async function loadInventoryTable() {
     } catch (e) { tableBody.innerHTML = "<tr><td colspan='5'>Gagal muat stok.</td></tr>"; }
 }
 
+/**
+ * FIX: LOAD AKUNTANSI YANG GAGAL MUAT
+ */
 async function loadAccountingTable() {
     const tableBody = document.getElementById("tableAccountingBody");
     tableBody.innerHTML = "<tr><td colspan='8' class='text-center'>Memuat data transaksi...</td></tr>";
     try {
-        const res = await fetch(`${config.apiUrl}?action=getAccounting`);
+        const response = await fetch(`${config.apiUrl}?action=getAccounting`);
         const data = await response.json();
+        
+        if (data.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='8' class='text-center'>Belum ada data transaksi.</td></tr>";
+            return;
+        }
+
         tableBody.innerHTML = data.map(item => `
             <tr>
                 <td><small>${item.tanggal}</small></td>
@@ -92,7 +102,10 @@ async function loadAccountingTable() {
                 <td>${item.harga}</td>
                 <td style="font-weight:bold; color:#10b981;">${item.total}</td>
             </tr>`).join("");
-    } catch (e) { tableBody.innerHTML = "<tr><td colspan='8'>Gagal muat akuntansi.</td></tr>"; }
+    } catch (e) { 
+        console.error("Error Akuntansi:", e);
+        tableBody.innerHTML = "<tr><td colspan='8' class='text-center text-danger'>Gagal muat akuntansi. Periksa koneksi atau deploy ulang script.</td></tr>"; 
+    }
 }
 
 function filterTable() {

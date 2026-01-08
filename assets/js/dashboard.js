@@ -1,5 +1,5 @@
 /**
- * DASHBOARD LOGIC - SBA BAJA (FULL VERSION)
+ * DASHBOARD LOGIC - SBA BAJA (VERSION: ADMIN DELETE ENABLED)
  */
 document.addEventListener("DOMContentLoaded", function() {
     checkAccess();
@@ -51,12 +51,12 @@ async function loadDashboardStats() {
 }
 
 /**
- * FIX: LOAD AKUNTANSI DENGAN TOMBOL HAPUS (OWNER ONLY)
+ * LOAD AKUNTANSI DENGAN FITUR HAPUS (OWNER ONLY)
  */
 async function loadAccountingTable() {
     const tbody = document.getElementById("tableAccountingBody");
     const role = localStorage.getItem("userRole").toLowerCase();
-    tbody.innerHTML = "<tr><td colspan='9' class='text-center'>Memuat...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='9' class='text-center'>Memuat riwayat transaksi...</td></tr>";
     
     try {
         const res = await fetch(`${config.apiUrl}?action=getAccounting`);
@@ -71,24 +71,27 @@ async function loadAccountingTable() {
                 <td>${item.nama}</td>
                 <td align="center">${item.qty}</td>
                 <td align="right">Rp ${item.harga}</td>
-                <td align="right" class="fw-bold">Rp ${item.total}</td>
+                <td align="right" class="fw-bold text-success">Rp ${item.total}</td>
                 <td>
                     ${role === "owner" || role === "admin" ? 
                     `<button class="btn btn-sm btn-danger" onclick="hapusTransaksiUI('${item.no_invoice}')">Hapus</button>` : '-'}
                 </td>
             </tr>`).join("");
-    } catch (e) { tbody.innerHTML = "<tr><td colspan='9'>Gagal muat.</td></tr>"; }
+    } catch (e) { tbody.innerHTML = "<tr><td colspan='9'>Gagal muat akuntansi.</td></tr>"; }
 }
 
+/**
+ * FUNGSI UI UNTUK HAPUS
+ */
 async function hapusTransaksiUI(noInv) {
-    if (!confirm(`HAPUS TRANSAKSI ${noInv}?\nStok akan otomatis dikembalikan ke gudang.`)) return;
+    if (!confirm(`Yakin Hapus Invoice ${noInv}?\nStok akan dikembalikan otomatis ke tab barang.`)) return;
     try {
         const res = await fetch(`${config.apiUrl}?action=deleteTransaction&no_invoice=${noInv}`);
         const result = await res.json();
         alert(result.message);
         loadAccountingTable();
         loadDashboardStats();
-    } catch (e) { alert("Gagal menghapus."); }
+    } catch (e) { alert("Terjadi kesalahan jaringan."); }
 }
 
 async function loadInventoryTable() {
@@ -98,6 +101,11 @@ async function loadInventoryTable() {
     tbody.innerHTML = items.map((i, idx) => `
         <tr><td>${idx+1}</td><td><strong>${i.kode}</strong></td><td>${i.nama}</td><td>${i.stok} ${i.satuan}</td><td>Rp ${i.harga.toLocaleString()}</td></tr>
     `).join("");
+}
+
+function filterTable() {
+    const f = document.getElementById("searchBarang").value.toUpperCase();
+    document.querySelectorAll("#tableBarangBody tr").forEach(r => r.style.display = r.innerText.toUpperCase().includes(f) ? "" : "none");
 }
 
 function logout() { if(confirm("Keluar?")) { localStorage.clear(); window.location.href="index.html"; } }

@@ -15,7 +15,6 @@
     </style>
 </head>
 <body>
-    
     <nav class="navbar d-flex justify-content-between align-items-center">
         <a href="#" class="navbar-brand">SBA BAJA - POS SYSTEM</a>
         <a href="dashboard.html" class="btn btn-outline-light btn-sm">Kembali Ke Dashboard</a>
@@ -25,7 +24,7 @@
         <div class="card">
             <h5>1. Informasi Transaksi</h5>
             <div class="row g-2">
-                <div class="col-md-3"><label>No Invoice</label><input type="text" id="noInvManual" class="form-control"></div>
+                <div class="col-md-3"><label>No Invoice</label><input type="text" id="noInvManual" class="form-control" placeholder="001"></div>
                 <div class="col-md-3"><label>Nama Pelanggan</label><input type="text" id="customer" class="form-control"></div>
                 <div class="col-md-3"><label>No HP</label><input type="text" id="telepon" class="form-control"></div>
                 <div class="col-md-3"><label>Alamat</label><textarea id="alamat" class="form-control" rows="1"></textarea></div>
@@ -46,10 +45,10 @@
             <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>Nama Barang</th>
+                        <th>Barang</th>
                         <th width="80">Qty</th>
-                        <th width="150">Harga Edit (Satuan)</th>
-                        <th class="text-end" width="150">Subtotal (Cetak)</th>
+                        <th width="150">Harga Edit</th>
+                        <th class="text-end" width="150">Subtotal</th>
                         <th width="50">Aksi</th>
                     </tr>
                 </thead>
@@ -65,7 +64,7 @@
                 <div class="d-flex justify-content-center gap-2">
                     <button class="btn btn-dark" id="btnInv">Cetak Invoice</button>
                     <button class="btn btn-outline-dark" id="btnSj">Cetak Surat Jalan</button>
-                    <button class="btn btn-secondary" onclick="location.reload()">Transaksi Baru</button>
+                    <button class="btn btn-secondary" onclick="location.reload()">Baru</button>
                 </div>
             </div>
         </div>
@@ -94,16 +93,11 @@
             const b = dbBarang.find(x => x.kode.toString() === selVal.toString());
             const q = parseFloat(document.getElementById("qty").value);
             if (!b || q <= 0) return alert("Pilih barang!");
-            
-            // Simpan harga asli (b.harga) dan harga jual awal (b.harga)
             cart.push({ ...b, qty: q, harga_jual: b.harga });
             render();
             document.getElementById("qty").value = "1";
         }
 
-        /**
-         * FIX: Menggunakan ONCHANGE agar input tidak kehilangan fokus saat diketik
-         */
         function updateHargaCart(idx, newPrice) {
             cart[idx].harga_jual = parseFloat(newPrice) || 0;
             render(); 
@@ -113,13 +107,11 @@
             const body = document.getElementById("cartBody"); 
             body.innerHTML = ""; 
             let totalPrint = 0;
-
             if (cart.length === 0) {
                 body.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Keranjang masih kosong.</td></tr>';
                 document.getElementById("grandTotal").innerText = "Total Cetak: Rp 0";
                 return;
             }
-
             cart.forEach((item, idx) => { 
                 const subtotal = item.qty * item.harga_jual;
                 totalPrint += subtotal;
@@ -127,11 +119,7 @@
                     <tr>
                         <td><strong>${item.nama}</strong></td>
                         <td>${item.qty}</td>
-                        <td>
-                            <input type="number" class="form-control form-control-sm" 
-                                   value="${item.harga_jual}" 
-                                   onchange="updateHargaCart(${idx}, this.value)">
-                        </td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.harga_jual}" onchange="updateHargaCart(${idx}, this.value)"></td>
                         <td class="text-end">Rp ${subtotal.toLocaleString('id-ID')}</td>
                         <td><button class="btn btn-sm btn-danger" onclick="cart.splice(${idx},1);render()">X</button></td>
                     </tr>`;
@@ -146,38 +134,31 @@
             
             btn.disabled = true;
             btn.innerText = "MENYIMPAN...";
-
+            
             const payload = { 
                 no_invoice: no, 
-                kasir: localStorage.getItem("username") || "Admin", 
+                kasir: localStorage.getItem("username") || "User", 
                 customer: document.getElementById("customer").value || "Umum", 
                 alamat: document.getElementById("alamat").value || "-", 
                 telepon: document.getElementById("telepon").value || "-", 
-                // Total yang dikirim ke header adalah total editan (hanya untuk referensi header)
                 total: cart.reduce((s, i) => s + (i.qty * i.harga_jual), 0), 
                 items: cart 
             };
-
+            
             try {
-                const res = await fetch(`${config.apiUrl}?action=simpanPenjualan`, { 
-                    method: "POST", 
-                    body: JSON.stringify(payload) 
-                });
+                const res = await fetch(`${config.apiUrl}?action=simpanPenjualan`, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
-                
                 if (result.status === "success") {
                     btn.style.display = "none";
                     document.getElementById("printSection").style.display = "block";
                     document.getElementById("btnInv").onclick = () => window.open(`invoice-print.html?no_invoice=${no}`, '_blank');
                     document.getElementById("btnSj").onclick = () => window.open(`surat-jalan-print.html?no_invoice=${no}`, '_blank');
                 } else {
-                    alert("Error: " + result.message);
+                    alert("Gagal: " + result.message);
                     btn.disabled = false;
+                    btn.innerText = "SIMPAN & PROSES TRANSAKSI";
                 }
-            } catch (e) {
-                alert("Kesalahan koneksi.");
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Kesalahan koneksi."); btn.disabled = false; }
         }
     </script>
 </body>

@@ -11,7 +11,7 @@
         .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; padding: 20px; background: white; }
         .btn-accent { background: #fbbf24; font-weight: bold; border: none; width: 100%; padding: 15px; }
         .total-box { font-size: 24px; font-weight: 800; text-align: right; margin-top: 10px; }
-        #printSection { display: none; margin-top: 20px; text-align: center; }
+        #printSection { display: none; margin-top: 20px; text-align: center; border: 2px dashed #10b981; padding: 15px; }
     </style>
 </head>
 <body>
@@ -24,7 +24,7 @@
         <div class="card">
             <h5>1. Informasi Transaksi</h5>
             <div class="row g-2">
-                <div class="col-md-3"><label>No Invoice</label><input type="text" id="noInvManual" class="form-control" placeholder="001"></div>
+                <div class="col-md-3"><label>No Invoice</label><input type="text" id="noInvManual" class="form-control" placeholder="Contoh: 001"></div>
                 <div class="col-md-3"><label>Nama Pelanggan</label><input type="text" id="customer" class="form-control"></div>
                 <div class="col-md-3"><label>No HP</label><input type="text" id="telepon" class="form-control"></div>
                 <div class="col-md-3"><label>Alamat</label><textarea id="alamat" class="form-control" rows="1"></textarea></div>
@@ -46,10 +46,10 @@
                 <thead>
                     <tr>
                         <th>Barang</th>
-                        <th width="80">Qty</th>
-                        <th width="150">Harga Edit</th>
-                        <th class="text-end" width="150">Subtotal</th>
-                        <th width="50">Aksi</th>
+                        <th>Qty</th>
+                        <th width="150">Harga Satuan (Edit)</th>
+                        <th class="text-end">Subtotal (Cetak)</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="cartBody">
@@ -64,7 +64,7 @@
                 <div class="d-flex justify-content-center gap-2">
                     <button class="btn btn-dark" id="btnInv">Cetak Invoice</button>
                     <button class="btn btn-outline-dark" id="btnSj">Cetak Surat Jalan</button>
-                    <button class="btn btn-secondary" onclick="location.reload()">Baru</button>
+                    <button class="btn btn-secondary" onclick="location.reload()">Transaksi Baru</button>
                 </div>
             </div>
         </div>
@@ -130,21 +130,18 @@
         async function simpanTransaksi() {
             const no = document.getElementById("noInvManual").value;
             const btn = document.getElementById("btnSimpan");
-            if (!no || cart.length === 0) return alert("Data tidak lengkap!");
-            
+            if (!no || cart.length === 0) return alert("Lengkapi data!");
             btn.disabled = true;
             btn.innerText = "MENYIMPAN...";
-            
             const payload = { 
                 no_invoice: no, 
-                kasir: localStorage.getItem("username") || "User", 
+                kasir: localStorage.getItem("username") || "Admin", 
                 customer: document.getElementById("customer").value || "Umum", 
                 alamat: document.getElementById("alamat").value || "-", 
                 telepon: document.getElementById("telepon").value || "-", 
                 total: cart.reduce((s, i) => s + (i.qty * i.harga_jual), 0), 
                 items: cart 
             };
-            
             try {
                 const res = await fetch(`${config.apiUrl}?action=simpanPenjualan`, { method: "POST", body: JSON.stringify(payload) });
                 const result = await res.json();
@@ -154,11 +151,10 @@
                     document.getElementById("btnInv").onclick = () => window.open(`invoice-print.html?no_invoice=${no}`, '_blank');
                     document.getElementById("btnSj").onclick = () => window.open(`surat-jalan-print.html?no_invoice=${no}`, '_blank');
                 } else {
-                    alert("Gagal: " + result.message);
+                    alert("Error: " + result.message);
                     btn.disabled = false;
-                    btn.innerText = "SIMPAN & PROSES TRANSAKSI";
                 }
-            } catch (e) { alert("Kesalahan koneksi."); btn.disabled = false; }
+            } catch (e) { alert("Server Error"); btn.disabled = false; }
         }
     </script>
 </body>

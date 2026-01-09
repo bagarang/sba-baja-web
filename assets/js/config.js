@@ -1,7 +1,8 @@
 const config = {
-    apiUrl: "https://script.google.com/macros/s/AKfycbzaQyabjDiHA691x5DxR3BJ0HlEezZu5f_nac96goHsamlAw6Qs8X8fG2dAAMdvfsvlVQ/exec"
+    apiUrl: "https://script.google.com/macros/s/AKfycbwWrl-sTuAoXNaR0gBur7x05Y3un4LfeCpMo2lJ1z_sUvHE6OjgnnnuVYFM3nvsL_-fpw/exec"
 
 };
+
 
 
 

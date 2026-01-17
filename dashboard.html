@@ -16,7 +16,6 @@
         .nav-menu li:hover { background: #334155; }
         .nav-menu li.active { background: #fbbf24; color: #1e293b; font-weight: bold; }
         
-        /* CSS Perbaikan Tombol Keluar (Putih) */
         .btn-logout {
             border: 1px solid #ffffff;
             color: #ffffff;
@@ -29,10 +28,7 @@
             margin-top: 50px;
             font-weight: 600;
         }
-        .btn-logout:hover {
-            background: #ffffff;
-            color: #1e293b;
-        }
+        .btn-logout:hover { background: #ffffff; color: #1e293b; }
 
         .view-section { display: none; }
         .view-section.active { display: block; }
@@ -60,7 +56,6 @@
         </div>
 
         <div class="content">
-            
             <div id="sectionDashboard" class="view-section active">
                 <div class="header-title">
                     <h1 id="mainTitle">Ringkasan Performa Toko</h1>
@@ -97,6 +92,7 @@
                 <div class="table-card">
                     <div class="table-header">
                         <h2>Riwayat Penjualan Lengkap</h2>
+                        <input type="text" id="searchAccounting" placeholder="Cari Tanggal / No Invoice..." onkeyup="filterAccounting()">
                     </div>
                     <div style="overflow-x: auto;">
                         <table id="tableAccounting">
@@ -110,6 +106,7 @@
                                     <th>Qty</th>
                                     <th>Harga Jual</th>
                                     <th>Total</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tableAccountingBody"></tbody>

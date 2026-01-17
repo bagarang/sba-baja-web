@@ -1,5 +1,5 @@
 /**
- * DASHBOARD LOGIC - SBA BAJA (VERSION: ADMIN DELETE ENABLED)
+ * DASHBOARD LOGIC - SBA BAJA SYSTEM
  */
 document.addEventListener("DOMContentLoaded", function() {
     checkAccess();
@@ -50,9 +50,6 @@ async function loadDashboardStats() {
     document.getElementById("statsTotal").innerText = f(data.total_omset);
 }
 
-/**
- * LOAD AKUNTANSI DENGAN FITUR HAPUS (OWNER ONLY)
- */
 async function loadAccountingTable() {
     const tbody = document.getElementById("tableAccountingBody");
     const role = localStorage.getItem("userRole").toLowerCase();
@@ -80,9 +77,6 @@ async function loadAccountingTable() {
     } catch (e) { tbody.innerHTML = "<tr><td colspan='9'>Gagal muat akuntansi.</td></tr>"; }
 }
 
-/**
- * FUNGSI UI UNTUK HAPUS
- */
 async function hapusTransaksiUI(noInv) {
     if (!confirm(`Yakin Hapus Invoice ${noInv}?\nStok akan dikembalikan otomatis ke tab barang.`)) return;
     try {
@@ -106,6 +100,29 @@ async function loadInventoryTable() {
 function filterTable() {
     const f = document.getElementById("searchBarang").value.toUpperCase();
     document.querySelectorAll("#tableBarangBody tr").forEach(r => r.style.display = r.innerText.toUpperCase().includes(f) ? "" : "none");
+}
+
+/**
+ * FUNGSI FILTER AKUNTANSI - UNTUK AUDIT
+ */
+function filterAccounting() {
+    const filter = document.getElementById("searchAccounting").value.toUpperCase();
+    const rows = document.querySelectorAll("#tableAccountingBody tr");
+
+    rows.forEach(row => {
+        const cells = row.getElementsByTagName("td");
+        if (cells.length > 1) {
+            const tanggalText = cells[0].innerText.toUpperCase(); // Kolom Tanggal
+            const invoiceText = cells[1].innerText.toUpperCase(); // Kolom No Invoice
+            
+            // Tampilkan baris jika cocok dengan Tanggal atau No Invoice
+            if (tanggalText.includes(filter) || invoiceText.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
 }
 
 function logout() { if(confirm("Keluar?")) { localStorage.clear(); window.location.href="index.html"; } }
